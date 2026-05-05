@@ -146,6 +146,18 @@ async function getPost(urlOrId) {
     throw new Error('Post not found');
   }
 
+  // Extract top-level comments
+  const commentChildren = data[1]?.data?.children || [];
+  const comments = commentChildren
+    .filter(c => c.kind === 't1')
+    .slice(0, 20)
+    .map(c => ({
+      author: c.data.author,
+      score: c.data.score,
+      body: c.data.body,
+      created: new Date(c.data.created_utc * 1000).toISOString(),
+    }));
+
   return {
     title: postData.title,
     author: postData.author,
@@ -157,6 +169,7 @@ async function getPost(urlOrId) {
     selftext: postData.selftext || '',
     subreddit: postData.subreddit,
     is_self: postData.is_self,
+    topComments: comments,
   };
 }
 
@@ -292,7 +305,17 @@ Examples:
       } else if (!post.is_self) {
         console.log(`[Link post] ${post.url}`);
       }
-      
+
+      if (post.topComments && post.topComments.length > 0) {
+        console.log(`\n${'─'.repeat(60)}`);
+        console.log(`💬 Top Comments (${post.topComments.length}/${post.comments}):\n`);
+        post.topComments.forEach((c, i) => {
+          console.log(`  ${i + 1}. u/${c.author} (⬆️ ${c.score})`);
+          const body = c.body.length > 300 ? c.body.substring(0, 300) + '...' : c.body;
+          console.log(`     ${body.replace(/\n/g, '\n     ')}\n`);
+        });
+      }
+
       return;
     }
 

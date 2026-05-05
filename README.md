@@ -161,9 +161,11 @@ The five phases:
 4. **Converge** — Direction change check → coverage check → round limits
 5. **Log + Evolve** — JSONL metrics → periodic self-review
 
-## Benchmarks
+## Evaluation
 
-Not yet. We plan to run side-by-side comparisons against [LangChain Open Deep Research](https://github.com/langchain-ai/open_deep_research) on the same question set. If you'd like to help, open an issue.
+The `evals/test_prompts.json` contains test cases for validating the skill works correctly across modes (Quick/Standard/Deep) and aliases. Run them against your agent to verify setup.
+
+For comparing output quality against other research tools, we recommend running the same question through both and human-judging on: coverage, source quality, actionability, and project-specificity.
 
 ## Philosophy
 

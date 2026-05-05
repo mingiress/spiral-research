@@ -14,7 +14,7 @@ description: |
   Output: 结构化研究报告（结论 + 子问题答案 + 来源 + 争议点 + 未解决缺口）
 
 user-invocable: true
-version: 3.11.0-mf
+version: 3.12.0-mf
 metadata:
   fork:
     origin: research-pro-v2
@@ -34,6 +34,7 @@ metadata:
       - "v3.9.0-mf: 工具局限表（9 条已知局限 + 应对策略）；数据来源：Grok API 文档 + Tavily 搜索 + 实测"
       - "v3.10.0-mf: Perplexity 降级为 fallback（引用幻觉 37%）；Grok web_search 升为实时搜索首选；信号 S2 更新"
       - "v3.11.0-mf: 结构化报告格式重构：YAML frontmatter（机器可读）、子问题统一表格、对比矩阵、来源清单集中管理、争议点对立展示、元数据表"
+      - "v3.12.0-mf: Quick 模式快速通道（跳过确认/2-tool check/keyword gate/研究地图/Critic）；Step 1.5 仅 Standard/Deep 强制；Reddit skill 替换 Tavily extract；移除硬编码 env 路径"
   pattern: spiral-convergence
   phases: 5
   requires:
@@ -115,9 +116,11 @@ Phase 1 结束时输出：
 计划工具：Tavily, Grok, ...
 ```
 
-### Step 1.5：等待确认（⛔ Hard Gate）
+### Step 1.5：等待确认（⛔ Hard Gate — Standard/Deep only）
 
-输出 Step 1.4 后**必须等待用户确认**，不得自行进入 Phase 2。
+**Quick 模式跳过此步** — 直接进入 Phase 2。
+
+Standard/Deep 模式：输出 Step 1.4 后**必须等待用户确认**，不得自行进入 Phase 2。
 
 问用户：
 > "方向对吗？要调整子问题、深度或工具吗？"
@@ -132,6 +135,16 @@ Phase 1 结束时输出：
 ## Phase 2：搜索准备
 
 **目标：** 为每个"未知"或"部分"子问题构建 query，选工具。
+
+### Quick 模式快速通道
+
+Quick 模式跳过以下规则，直接执行：
+- ❌ 不需要 2-3 个 keyword 组合（1 个好 query 即可）
+- ❌ 不需要工具覆盖检查（允许只用 Tavily）
+- ❌ 不需要信号路由（除非明显匹配 S1-S6）
+- ✅ 仍然做 Phase 1.1（本地检查）和 1.2（歧义检查）
+
+### Standard/Deep 模式完整流程
 
 1. 每个子问题提取 **2-3 个 keyword 组合**
 2. 对每个子问题过一遍**信号路由规则**（见下方），确定工具组合
@@ -261,7 +274,7 @@ node ~/.claude/skills/reddit/scripts/reddit-cli.cjs post "URL-or-ID"
 node ~/.claude/skills/reddit/scripts/reddit-cli.cjs posts LocalLLaMA 5 top
 ```
 
-**⛔ Gate：** 每个子问题有至少 2 个 keyword 组合才能开始搜索。
+**⛔ Gate（Standard/Deep only）：** 每个子问题有至少 2 个 keyword 组合才能开始搜索。
 
 ---
 
@@ -269,7 +282,15 @@ node ~/.claude/skills/reddit/scripts/reddit-cli.cjs posts LocalLLaMA 5 top
 
 **目标：** 执行搜索，更新研究地图，发现并评分新线索。
 
-**步骤：**
+### Quick 模式简化
+
+Quick 模式下：
+- 搜索 1-2 次，得到答案即可停止
+- 不需要线索评分、Critic、Reflection
+- 不需要维护完整研究地图
+- 事实仍然**必须带来源 URL**
+
+### Standard/Deep 完整步骤
 
 1. **并行发起**所有未知子问题的搜索
 2. 对每条结果：
@@ -332,7 +353,7 @@ node ~/.claude/skills/reddit/scripts/reddit-cli.cjs posts LocalLLaMA 5 top
 输出报告后，用 Bash 追加一行 JSONL：
 
 ```bash
-echo '{...}' >> ~/.local/share/spiral-research/run-log.jsonl
+echo '{...}' >> ~/.openclaw/projects/research-pro-v3/run-log.jsonl
 ```
 
 **JSONL 字段（完整）：**
@@ -408,7 +429,7 @@ echo '{...}' >> ~/.local/share/spiral-research/run-log.jsonl
 Phase 1 开始前，检查日志行数：
 
 ```bash
-wc -l < ~/.local/share/spiral-research/run-log.jsonl 2>/dev/null || echo 0
+wc -l < ~/.openclaw/projects/research-pro-v3/run-log.jsonl 2>/dev/null || echo 0
 ```
 
 如果行数是 **10 的倍数且 > 0**，在 Phase 1 之前输出复盘：

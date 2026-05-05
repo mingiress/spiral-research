@@ -1,19 +1,46 @@
 # Spiral Research
 
-> Most research agents use linear pipelines. This one thinks in spirals — iteratively narrowing hypotheses with multi-tool signal routing. Unproven but opinionated.
+> A research skill with multi-tool signal routing, local-first context, and transparent iterative convergence. You see every step and can intervene at any point.
 
-A structured research skill for AI coding agents (Claude Code, OpenCode, Codex). Instead of plan-then-search-then-report, it searches while thinking — each round updates hypotheses, scores new leads, and self-corrects direction.
+A structured research skill for AI coding agents (Claude Code, OpenCode, Codex). Every research tool today is iterative — the difference is what you can control and what it knows about your project.
 
-## How It's Different
+## What Makes This Different
 
-| | Linear Pipeline (most tools) | Spiral Convergence (this) |
-|---|---|---|
-| **Flow** | Plan → Search → Synthesize → Report | Question → Hypothesize → Search → Reflect → Narrow → Repeat |
-| **Adaptation** | Fixed plan, execute once | Hypotheses update every round based on findings |
-| **Tool selection** | One search tool for everything | Signal routing (S1-S6) picks tool combos per sub-question |
-| **Quality check** | Post-hoc critique | Every-round Critic + Reflection, mid-research direction changes |
-| **Learning** | None | Run-log + auto-review every 10 runs |
-| **Human involvement** | Approve outline, then hands-off | Confirm direction before searching, consulted on pivots |
+Most research tools (Tavily Research, LangChain Deep Research, etc.) are multi-step internally. We don't claim to be the only iterative approach. Our actual differentiators:
+
+### 1. Multi-Tool Signal Routing (S1-S6)
+
+Instead of routing everything through one search API, signal matching picks the right tool combination per sub-question:
+
+- Community question → Reddit skill + Grok X/Twitter
+- Recency question → Grok web_search
+- Deep comparison → Tavily Research + realtime tool
+- Known URL → Firecrawl scrape
+
+No other research skill does tool selection at the sub-question level.
+
+### 2. Local-First Context
+
+Before any web search, the skill checks your project files — configs, code, docs. This means recommendations are tailored to your actual setup (e.g., "you use Vitest, so Braintrust's Vitest plugin is relevant") rather than generic.
+
+### 3. Transparent + Interruptible
+
+You see the research map (hypotheses, sub-questions, clue scores) and confirm direction before tokens are spent. Mid-research pivots require your consent.
+
+### 4. Self-Evolution
+
+Every run logs tool usage, contribution rates, and gaps. Every 10 runs, auto-reviews which tools are over/under-used and adjusts signal routing.
+
+## Comparison
+
+| | Black-box APIs (Tavily Research, Perplexity) | Framework agents (LangChain, 199-bio) | This skill |
+|---|---|---|---|
+| **Iterative** | Yes (hidden) | Yes (visible) | Yes (visible) |
+| **Multi-tool routing** | No (single API) | No (usually one search tool) | Yes (S1-S6 signals) |
+| **Knows your project** | No | No | Yes (local-first check) |
+| **Human-in-the-loop** | No | Outline approval only | Direction confirm + pivot consent |
+| **Self-improving** | No | No | Yes (run-log + auto-review) |
+| **Setup** | API key | Python env + LangGraph server | Single skill file + CLI tools |
 
 ## Core Concepts
 
